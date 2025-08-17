@@ -1,205 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8" />
-<title>🌸 Sakura Golden Ratio 🌸</title>
-<style>
-  body {
-    margin: 0;
-    background: radial-gradient(circle, #ffe4f1 0%, #fff0f5 100%);
-    font-family: "Comic Sans MS", sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    height: 100vh;
-    overflow: hidden;
-  }
-  h1 {
-    color: #cc6699;
-    font-size: 2rem;
-    margin-top: 20px;
-    margin-bottom: 10px;
-  }
-  .controls {
-    margin-bottom: 1rem;
-  }
-  input[type="number"] {
-    padding: 6px 10px;
-    font-size: 1rem;
-    width: 100px;
-    border: 2px solid #ffb6c1;
-    border-radius: 8px;
-    text-align: center;
-  }
-  button {
-    margin-left: 10px;
-    padding: 6px 14px;
-    font-size: 1rem;
-    background-color: #ffb6c1;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    color: white;
-  }
-  button:hover {
-    background-color: #e89eb4;
-  }
-  #container {
-    position: relative;
-    width: 100%;
-    max-width: 1920px;
-    height: 80vh;
-    border: 1px solid #ffb6c1;
-    background: #fff0f5;
-    overflow: hidden;
-  }
-  canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 0;
-    user-select: none;
-  }
-  #spiral {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    user-select: none;
-  }
-  .sakura {
-    position: absolute;
-    font-size: 18px;
-    transition: transform 0.3s ease;
-    user-select: none;
-  }
-  .sakura:hover {
-    transform: scale(1.5) rotate(10deg);
-  }
-  .label {
-    position: absolute;
-    font-size: 10px;
-    color: #cc6699;
-    user-select: none;
-    font-weight: bold;
-    pointer-events: none;
-    transform: translate(-50%, -120%);
-    white-space: nowrap;
-  }
-</style>
-</head>
-<body>
-<h1>🌸 Sakural 🌸</h1>
-<div class="controls">
-  <label>How many terms? (max 200)</label>
-  <input type="number" id="fibInput" min="1" max="200" value="50" />
-  <button onclick="drawSpiral()">Draw Spiral</button>
-</div>
-<div id="container">
-  <canvas id="spiralCanvas"></canvas>
-  <div id="spiral"></div>
-</div>
+  <head>
+    <meta charset="UTF-8" />
+    <title>🌸 Sakura Golden Ratio Spiral 🌸</title>
+    <style>
+      body {
+        margin: 0;
+        background: radial-gradient(circle, #ffe4f1 0%, #fff0f5 100%);
+        font-family: "Comic Sans MS", sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        height: 100vh;
+        overflow: hidden;
+      }
+      h1 {
+        color: #cc6699;
+        font-size: 2rem;
+        margin: 10px;
+      }
+      .controls {
+        margin-bottom: 10px;
+      }
+      input[type="number"] {
+        padding: 6px 10px;
+        font-size: 1rem;
+        width: 100px;
+        border: 2px solid #ffb6c1;
+        border-radius: 8px;
+        text-align: center;
+      }
+      button {
+        margin-left: 10px;
+        padding: 6px 14px;
+        font-size: 1rem;
+        background-color: #ffb6c1;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        color: white;
+      }
+      button:hover {
+        background-color: #e89eb4;
+      }
+      #container {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+      canvas {
+        background: #fff0f5;
+        border: 2px solid #ffb6c1;
+        border-radius: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🌸 Sakura Golden Spiral 🌸</h1>
+    <div class="controls">
+      <label>How many terms? (max 100)</label>
+      <input type="number" id="fibInput" min="1" max="100" value="12" />
+      <button onclick="drawSpiral()">Draw</button>
+    </div>
+    <div id="container">
+      <canvas id="spiralCanvas"></canvas>
+    </div>
 
-<script>
-  // Generate Fibonacci sequence
-  function fibonacci(n) {
-    const seq = [];
-    if (n >= 1) seq.push(0);
-    if (n >= 2) seq.push(1);
-    for (let i = 2; i < n; i++) {
-      seq.push(seq[i - 1] + seq[i - 2]);
-    }
-    return seq;
-  }
+    <script>
+      function fibonacci(n) {
+        const seq = [1, 1];
+        for (let i = 2; i < n; i++) seq.push(seq[i - 1] + seq[i - 2]);
+        return seq.slice(0, n);
+      }
 
-  function drawSpiral() {
-    const input = document.getElementById("fibInput");
-    let n = parseInt(input.value);
-    if (isNaN(n) || n < 1) n = 50;
-    if (n > 200) n = 200;
+      // Pre-render tiny sakura blossom onto an offscreen canvas for speed
+      const sakuraCanvas = document.createElement("canvas");
+      sakuraCanvas.width = 20;
+      sakuraCanvas.height = 20;
+      const sctx = sakuraCanvas.getContext("2d");
+      sctx.font = "16px Comic Sans MS";
+      sctx.textAlign = "center";
+      sctx.textBaseline = "middle";
+      sctx.fillText("🌸", 10, 10);
+      const sakuraPattern = sakuraCanvas;
 
-    const fib = fibonacci(n);
-    const spiral = document.getElementById("spiral");
-    const canvas = document.getElementById("spiralCanvas");
-    const ctx = canvas.getContext("2d");
+      function drawSpiral() {
+        const input = document.getElementById("fibInput");
+        let n = parseInt(input.value);
+        if (isNaN(n) || n < 1) n = 12;
+        if (n > 100) n = 100;
 
-    // Resize canvas
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+        const fib = fibonacci(n);
+        const canvas = document.getElementById("spiralCanvas");
+        canvas.width = window.innerWidth * 0.9;
+        canvas.height = window.innerHeight * 0.8;
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const width = canvas.width;
-    const height = canvas.height;
-    const centerX = width / 2;
-    const centerY = height / 2;
+        let x = canvas.width / 2;
+        let y = canvas.height / 2;
+        let dir = 0;
+        let positions = [{ x, y, size: fib[0] }];
+        let minX = x, maxX = x + fib[0], minY = y, maxY = y + fib[0];
 
-    spiral.innerHTML = "";
-    ctx.clearRect(0, 0, width, height);
+        for (let i = 1; i < fib.length; i++) {
+          const size = fib[i];
+          let prev = positions[i - 1];
+          let nx = prev.x, ny = prev.y;
+          if (dir === 0) nx = prev.x + prev.size;
+          else if (dir === 1) ny = prev.y - size;
+          else if (dir === 2) nx = prev.x - size;
+          else if (dir === 3) ny = prev.y + prev.size;
+          positions.push({ x: nx, y: ny, size });
+          minX = Math.min(minX, nx);
+          maxX = Math.max(maxX, nx + size);
+          minY = Math.min(minY, ny);
+          maxY = Math.max(maxY, ny + size);
+          dir = (dir + 1) % 4;
+        }
 
-    const a = 2;
-    const phi = (1 + Math.sqrt(5)) / 2;
-    const goldenAngle = Math.PI * (3 - Math.sqrt(5));
-    const b = Math.log(phi) / goldenAngle;
+        const padding = 20;
+        const totalW = maxX - minX;
+        const totalH = maxY - minY;
+        const scale = Math.min(
+          (canvas.width - 2 * padding) / totalW,
+          (canvas.height - 2 * padding) / totalH
+        );
+        const offsetX = (canvas.width - totalW * scale) / 2 - minX * scale;
+        const offsetY = (canvas.height - totalH * scale) / 2 - minY * scale;
 
-    // Compute points
-    const points = [];
-    for (let i = 0; i < fib.length; i++) {
-      const theta = i * goldenAngle;
-      const r = a * Math.exp(b * theta);
-      const x = r * Math.cos(theta);
-      const y = r * Math.sin(theta);
-      points.push({ x, y });
-    }
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
 
-    // Find max X/Y for scaling
-    let maxX = 0, maxY = 0;
-    for (const p of points) {
-      if (Math.abs(p.x) > maxX) maxX = Math.abs(p.x);
-      if (Math.abs(p.y) > maxY) maxY = Math.abs(p.y);
-    }
-    const padding = 60;
-    const scale = Math.min((width/2 - padding)/maxX, (height/2 - padding)/maxY);
+        // Draw squares with sakura borders
+        positions.forEach((p, i) => {
+          const sx = p.x * scale + offsetX;
+          const sy = p.y * scale + offsetY;
+          const s = p.size * scale;
 
-    // Draw spiral curve
-    ctx.beginPath();
-    ctx.strokeStyle = "#ff69b4";
-    ctx.lineWidth = 2;
-    const lastTheta = (fib.length - 1) * goldenAngle;
-    const thetaMax = lastTheta + 5 * goldenAngle;
-    for (let theta = 0; theta <= thetaMax; theta += 0.01) {
-      const r = a * Math.exp(b * theta) * scale;
-      const x = centerX + r * Math.cos(theta);
-      const y = centerY + r * Math.sin(theta);
-      if (theta === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    }
-    ctx.stroke();
+          // pastel fill
+          ctx.fillStyle = i % 2 === 0 ? "#ffeaf4" : "#fff";
+          ctx.fillRect(sx, sy, s, s);
 
-    // Draw blossoms and labels
-    for (let i = 0; i < points.length; i++) {
-      const x = centerX + points[i].x * scale;
-      const y = centerY + points[i].y * scale;
+          // sakura blossoms along edges
+          const step = Math.max(20, s / 6);
+          for (let dx = 0; dx <= s; dx += step) {
+            ctx.drawImage(sakuraPattern, sx + dx - 10, sy - 10, 20, 20); // top
+            ctx.drawImage(sakuraPattern, sx + dx - 10, sy + s - 10, 20, 20); // bottom
+          }
+          for (let dy = 0; dy <= s; dy += step) {
+            ctx.drawImage(sakuraPattern, sx - 10, sy + dy - 10, 20, 20); // left
+            ctx.drawImage(sakuraPattern, sx + s - 10, sy + dy - 10, 20, 20); // right
+          }
 
-      const blossom = document.createElement("div");
-      blossom.className = "sakura";
-      blossom.textContent = "🌸";
-      blossom.style.left = `${x}px`;
-      blossom.style.top = `${y}px`;
-      spiral.appendChild(blossom);
+          // number in center (dynamic size)
+          ctx.font = `${Math.max(10, s / 4)}px Comic Sans MS`;
+          ctx.fillStyle = "#cc3366";
+          ctx.fillText(fib[i], sx + s / 2, sy + s / 2);
+        });
 
-      const label = document.createElement("div");
-      label.className = "label";
-      label.textContent = fib[i];
-      label.style.left = `${x}px`;
-      label.style.top = `${y}px`;
-      spiral.appendChild(label);
-    }
-  }
+        // Draw spiral arcs
+        ctx.strokeStyle = "#ff69b4";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
 
-  // Draw default on load
-  drawSpiral();
-</script>
-</body>
+        dir = 0;
+        for (let i = 0; i < positions.length; i++) {
+          const p = positions[i];
+          const sx = p.x * scale + offsetX;
+          const sy = p.y * scale + offsetY;
+          const s = p.size * scale;
+          let cx, cy, startAngle, endAngle;
+          if (dir === 0) { cx = sx; cy = sy + s; startAngle = 1.5 * Math.PI; endAngle = 2 * Math.PI; }
+          else if (dir === 1) { cx = sx + s; cy = sy + s; startAngle = Math.PI; endAngle = 1.5 * Math.PI; }
+          else if (dir === 2) { cx = sx + s; cy = sy; startAngle = 0.5 * Math.PI; endAngle = Math.PI; }
+          else if (dir === 3) { cx = sx; cy = sy; startAngle = 0; endAngle = 0.5 * Math.PI; }
+          ctx.arc(cx, cy, s, startAngle, endAngle);
+          dir = (dir + 1) % 4;
+        }
+        ctx.stroke();
+      }
+
+      drawSpiral();
+      window.addEventListener("resize", drawSpiral);
+    </script>
+  </body>
 </html>
